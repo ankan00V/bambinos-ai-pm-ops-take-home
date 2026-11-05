@@ -179,8 +179,8 @@ def build():
           "auto-approves 7 of 13 cases today and would clear 9 of 12 paid renewals with no human. The five blocking exceptions it "
           "leaves have an owner, an SLA and a drafted message."),
         p("That is worth about 144 ops hours a month at 1,000 renewals, INR 43,186, against a one-time build of about "
-          "INR 2,00,000. The ask is small: three weeks in shadow mode, and one policy decision about whether a renewing "
-          "student in a full batch is actually blocked."),
+          "INR 2,00,000. The ask is small: three weeks in shadow mode, and one live-roster validation that confirms "
+          "the same-batch renewal retains an existing seat."),
     ])
     pages = [cover, page("A · Executive summary", "The pipeline leaks in three places, and none of them is effort", exec_body)]
 
