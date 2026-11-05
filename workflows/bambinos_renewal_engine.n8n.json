@@ -1,0 +1,581 @@
+{
+  "name": "Bambinos renewal reconciliation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "every-15-minutes",
+      "name": "Every 15 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "Runs the reconciliation every 15 minutes."
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "invoices",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "read-invoices",
+      "name": "Read invoices",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "faculty_form_unapproved",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "read-forms",
+      "name": "Read forms",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        0
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "booking_requests",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "read-bookings",
+      "name": "Read bookings",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        0
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "class_schedule_bookings",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "read-schedule",
+      "name": "Read schedule",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        0
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "reference_active_batches_and_students",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "read-reference",
+      "name": "Read reference",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1100,
+        0
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const rows = (name) => $(name).all().map((item) => item.json);\nconst invoices = rows('Read invoices');\nconst forms = rows('Read forms');\nconst bookings = rows('Read bookings');\nconst schedule = rows('Read schedule');\nconst reference = rows('Read reference');\n\nconst text = (value) => (value === null || value === undefined ? '' : String(value).trim());\nconst num = (value) => {\n  const parsed = parseFloat(text(value).replace(/[^0-9.\\-]/g, ''));\n  return Number.isNaN(parsed) ? 0 : parsed;\n};\nconst truthy = (value) => ['yes', 'y', 'true', '1'].includes(text(value).toLowerCase());\nconst onlyDigits = (value) => text(value).toUpperCase().replace(/[^0-9X]/g, '');\n\nconst normalizePhone = (value) => {\n  let digits = onlyDigits(value);\n  if (digits.startsWith('00')) digits = digits.slice(2);\n  if (digits.startsWith('971') && digits.length >= 12) return digits.slice(3);\n  if (digits.startsWith('1') && digits.length === 11) return digits.slice(1);\n  if (digits.startsWith('0') && digits.length > 10) digits = digits.slice(1);\n  if (digits.startsWith('91') && digits.length === 12) digits = digits.slice(2);\n  return digits;\n};\n\nconst phoneScore = (left, right) => {\n  const a = normalizePhone(left);\n  const b = normalizePhone(right);\n  if (!a || !b) return 0;\n  if (a === b) return 1;\n  const tail = Math.min(a.length, b.length, 6);\n  return tail >= 4 && a.slice(-tail) === b.slice(-tail) ? 0.8 : 0;\n};\n\nconst emailScore = (left, right) => {\n  const a = text(left).toLowerCase();\n  const b = text(right).toLowerCase();\n  if (!a || !b) return 0;\n  if (a === b) return 1;\n  const partsA = a.split('@');\n  const partsB = b.split('@');\n  if (!partsA[1] || partsA[1] !== partsB[1]) return 0;\n  return partsA[0].slice(0, 2) === partsB[0].slice(0, 2) ? 0.7 : 0;\n};\n\nconst invoiceRef = (value) => {\n  const runs = text(value).match(/\\d+/g);\n  return runs ? runs[runs.length - 1] : '';\n};\n\nconst distance = (a, b) => {\n  const matrix = [];\n  for (let i = 0; i <= b.length; i += 1) {\n    matrix.push(new Array(a.length + 1).fill(0));\n    matrix[i][0] = i;\n  }\n  for (let j = 0; j <= a.length; j += 1) matrix[0][j] = j;\n  for (let i = 1; i <= b.length; i += 1) {\n    for (let j = 1; j <= a.length; j += 1) {\n      const cost = b[i - 1] === a[j - 1] ? 0 : 1;\n      matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);\n    }\n  }\n  return matrix[b.length][a.length];\n};\n\nconst similarity = (a, b) => {\n  const first = text(a).toLowerCase();\n  const second = text(b).toLowerCase();\n  if (!first || !second) return 0;\n  return 1 - distance(first, second) / Math.max(first.length, second.length);\n};\n\nconst parseDate = (value) => {\n  const raw = text(value);\n  if (!raw) return null;\n  const parsed = new Date(raw.replace(' ', 'T'));\n  return Number.isNaN(parsed.getTime()) ? null : parsed;\n};\n\nlet asOf = null;\n[...invoices, ...forms, ...bookings, ...schedule].forEach((row) => {\n  ['paid_at', 'created_at', 'updated_at', 'approved_at', 'allocated_at'].forEach((field) => {\n    const parsed = parseDate(row[field]);\n    if (parsed && (!asOf || parsed > asOf)) asOf = parsed;\n  });\n});\n\nconst hoursSince = (value) => {\n  const parsed = parseDate(value);\n  return parsed ? Math.max(0, (asOf - parsed) / 3600000) : 0;\n};\n\nconst invoiceById = {};\ninvoices.forEach((row) => { invoiceById[text(row.id)] = row; });\nconst referenceByStudent = {};\nreference.forEach((row) => { referenceByStudent[text(row.student_id)] = row; });\nconst batches = {};\nreference.forEach((row) => {\n  const key = text(row.current_classbatch_id);\n  if (!batches[key]) batches[key] = row;\n});\nconst bookingsByForm = {};\nbookings.forEach((row) => {\n  const key = text(row.faculty_form_id);\n  if (!bookingsByForm[key]) bookingsByForm[key] = [];\n  bookingsByForm[key].push(row);\n});\nconst scheduleByBooking = {};\nschedule.forEach((row) => {\n  const key = text(row.bookingrequest_id);\n  if (!scheduleByBooking[key]) scheduleByBooking[key] = [];\n  scheduleByBooking[key].push(row);\n});\n\nconst resolve = (form) => {\n  const claimed = text(form.invoice_id);\n  const link = text(form.invoice_link);\n  const linkId = invoiceRef(link);\n  if (invoiceById[claimed]) return { invoice: invoiceById[claimed], method: 'exact', score: 1 };\n  if (invoiceById[linkId]) return { invoice: invoiceById[linkId], method: 'link', score: 1 };\n  const claimedAmount = num(form.amount_paid);\n  const scored = invoices\n    .filter((invoice) => text(invoice.student_id) === text(form.student_id))\n    .filter((invoice) => Math.abs(num(invoice.net_amount) - claimedAmount) <= Math.max(1, num(invoice.net_amount) * 0.005))\n    .map((invoice) => ({ invoice, score: Math.max(similarity(claimed, invoice.id), similarity(linkId, invoice.id)) }))\n    .sort((a, b) => b.score - a.score);\n  if (!scored.length) return { invoice: null, method: 'none', score: 0 };\n  if (scored[0].score < 0.72) return { invoice: null, method: 'below_threshold', score: scored[0].score };\n  if (scored.length > 1 && scored[0].score - scored[1].score < 0.05) return { invoice: null, method: 'ambiguous', score: scored[0].score };\n  return { invoice: scored[0].invoice, method: 'fuzzy', score: scored[0].score };\n};\n\nconst money = (value) => 'Rs ' + Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });\n\nconst block = (row, code, reason, owner, severity, sla) => Object.assign(row, {\n  decision: 'EXCEPTION',\n  primary_code: code,\n  reason,\n  owner,\n  severity,\n  sla_hours: sla,\n  blocking: 'Yes',\n  fallback_message: reason,\n});\n\nconst approve = (row, reason) => Object.assign(row, {\n  decision: 'AUTO_APPROVE',\n  primary_code: 'R00',\n  reason,\n  owner: 'system',\n  severity: 'Info',\n  sla_hours: 0,\n  blocking: 'No',\n  fallback_message: reason,\n});\n\nconst seenInvoices = {};\nconst output = [];\n\nforms\n  .slice()\n  .sort((a, b) => text(a.created_at).localeCompare(text(b.created_at)))\n  .forEach((form) => {\n    const match = resolve(form);\n    const invoice = match.invoice;\n    const base = {\n      record_type: 'form',\n      record_id: text(form.id),\n      student_id: text(form.student_id),\n      student_name: text(form.student_name),\n      educator_name: text(form.educator_name),\n      match_method: match.method,\n      match_score: Number(match.score.toFixed(3)),\n    };\n\n    if (!invoice) {\n      output.push(block(Object.assign({}, base, { case_key: 'FORM-' + text(form.id), classbatch_id: text(form.current_classbatch_id), hours_in_state: hoursSince(form.created_at), audience: 'teacher' }),\n        'R02', 'Form ' + text(form.id) + ' points at invoice ' + text(form.invoice_id) + ' which does not exist and cannot be repaired safely.', 'teacher', 'High', 4));\n      return;\n    }\n\n    const caseKey = text(invoice.id);\n    const row = Object.assign({}, base, {\n      case_key: caseKey,\n      classbatch_id: text(form.current_classbatch_id),\n      invoice_id: caseKey,\n      student_id: text(invoice.student_id),\n      amount_collected: num(invoice.net_amount),\n      hours_in_state: Number(hoursSince(invoice.paid_at || form.created_at).toFixed(1)),\n      audience: 'ops_agent',\n    });\n\n    if (seenInvoices[caseKey]) {\n      output.push(block(row, 'R04', 'Form ' + text(form.id) + ' repeats invoice ' + caseKey + '. The first form is already in the queue.', 'teacher', 'Low', 24));\n      output[output.length - 1].blocking = 'No';\n      return;\n    }\n    seenInvoices[caseKey] = true;\n\n    const referenceRow = referenceByStudent[text(invoice.student_id)] || null;\n    const status = text(invoice.payment_status).toLowerCase();\n\n    if (!['paid', 'partially_paid'].includes(status)) {\n      return output.push(block(row, 'R07', 'Invoice ' + caseKey + ' is ' + text(invoice.payment_status) + ' with no settled amount, but a form was submitted as paid.', 'parent', 'High', 24));\n    }\n\n    const billed = num(invoice.amount);\n    const collected = num(invoice.net_amount);\n    const discount = num(invoice.discount_amount);\n    const claimed = num(form.amount_paid);\n    const tolerance = Math.max(1, billed * 0.005);\n    const expected = billed - discount;\n\n    if (text(invoice.payment_type).toLowerCase() !== 'full' || collected + tolerance < expected) {\n      return output.push(block(row, 'R06', 'Invoice ' + caseKey + ' billed ' + money(billed) + ' and ' + money(collected) + ' arrived (' + text(invoice.payment_type) + '). The form claims ' + money(claimed) + '.', 'finance', 'High', 4));\n    }\n\n    if (Math.abs(claimed - collected) > 1) {\n      return output.push(block(row, 'R05', 'Form claims ' + money(claimed) + ' but invoice ' + caseKey + ' collected ' + money(collected) + '.', 'finance', 'High', 4));\n    }\n\n    if (!referenceRow) {\n      return output.push(block(row, 'R10', 'Student ' + text(invoice.student_id) + ' is not in the active batch reference.', 'ops_agent', 'High', 4));\n    }\n\n    const phone = phoneScore(invoice.mobile, referenceRow.registered_mobile_masked);\n    const email = emailScore(invoice.email, referenceRow.registered_email_masked);\n    if (text(form.student_id) !== text(invoice.student_id)) {\n      return output.push(block(row, 'R11', 'Form is for student ' + text(form.student_id) + ' but the invoice belongs to ' + text(invoice.student_id) + '.', 'ops_agent', 'High', 4));\n    }\n    if (phone < 0.8 && email < 0.8) {\n      return output.push(block(row, 'R12', 'Invoice was paid from ' + text(invoice.mobile) + ', which matches neither the registered mobile (' + text(referenceRow.registered_mobile_masked) + ') nor the registered email.', 'ops_agent', 'Medium', 4));\n    }\n\n    const batchId = text(form.current_classbatch_id);\n    const batch = batches[batchId] || null;\n    if (!truthy(form.continue_same_batch)) {\n      return output.push(block(Object.assign(row, { audience: 'parent' }), 'R09', 'Batch change requested. Currently ' + text(referenceRow.batch_days) + ' at ' + text(referenceRow.batch_start_time) + ', form asks for ' + text(form.preferred_days) + ' at ' + text(form.preferred_time_slot) + '.', 'parent', 'Medium', 8));\n    }\n    if (!batch) {\n      return output.push(block(row, 'R23', 'Batch ' + batchId + ' is not in the active batch reference.', 'ops_agent', 'High', 4));\n    }\n    if (text(referenceRow.current_classbatch_id) !== batchId) {\n      return output.push(block(row, 'R15', 'Form names batch ' + batchId + ' but the student is on ' + text(referenceRow.current_classbatch_id) + '.', 'ops_agent', 'Medium', 4));\n    }\n    if (text(form.educator_id) !== text(referenceRow.educator_id)) {\n      return output.push(block(row, 'R13', 'Form credits teacher ' + text(form.educator_id) + ' but the record has ' + text(referenceRow.educator_id) + '.', 'ops_agent', 'High', 4));\n    }\n    if (num(form.sessions_purchased) <= 0) {\n      return output.push(block(row, 'R16', 'Form records zero sessions.', 'teacher', 'Medium', 8));\n    }\n\n    const rooms = bookingsByForm[text(form.id)] || [];\n    const sessions = rooms.reduce((all, booking) => all.concat(scheduleByBooking[text(booking.id)] || []), []);\n    if (text(form.approval_status).toLowerCase() === 'approved') {\n      if (!rooms.length) {\n        return output.push(block(row, 'R21', 'Form was approved but no booking request exists.', 'ops_agent', 'High', 4));\n      }\n      if (!sessions.length) {\n        return output.push(block(row, 'R20', 'Approved ' + text(form.approved_at) + ' and booking ' + text(rooms[0].id) + ' is still ' + text(rooms[0].request_status) + '.', 'ops_agent', 'High', 4));\n      }\n      row.decision = 'ALREADY_PROCESSED';\n      row.primary_code = 'R17';\n      row.reason = 'Already has ' + sessions.length + ' session rows.';\n      row.owner = 'system';\n      row.severity = 'Info';\n      row.blocking = 'No';\n      row.sla_hours = 0;\n      return output.push(row);\n    }\n\n    const seatsLeft = num(batch.max_batch_size) - num(batch.active_students_count);\n    if (seatsLeft <= 0) {\n      return output.push(block(row, 'R08', 'Batch ' + batchId + ' is at ' + num(batch.active_students_count) + ' of ' + num(batch.max_batch_size) + ' seats. ' + money(collected) + ' has waited ' + row.hours_in_state + ' hours.', 'ops_agent', 'High', 4));\n    }\n\n    approve(row, 'Payment ' + money(collected) + ' matches invoice ' + caseKey + ' and batch ' + batchId + ' has ' + seatsLeft + ' free seats.');\n    output.push(row);\n  });\n\ninvoices.forEach((invoice) => {\n  const caseKey = text(invoice.id);\n  if (seenInvoices[caseKey]) return;\n  const status = text(invoice.payment_status).toLowerCase();\n  if (!['paid', 'partially_paid'].includes(status)) return;\n  const referenceRow = referenceByStudent[text(invoice.student_id)] || null;\n  if (!referenceRow) return;\n  const backup = bookingsByForm['__none__'] || [];\n  if (backup.length) return;\n  const row = {\n    case_key: caseKey,\n    record_type: 'invoice',\n    record_id: caseKey,\n    invoice_id: caseKey,\n    student_id: text(invoice.student_id),\n    student_name: text(referenceRow.student_name_masked),\n    educator_name: text(referenceRow.educator_name),\n    classbatch_id: text(referenceRow.current_classbatch_id),\n    amount_collected: num(invoice.net_amount),\n    hours_in_state: Number(hoursSince(invoice.paid_at).toFixed(1)),\n    audience: 'teacher',\n    match_method: 'invoice',\n    match_score: 1,\n  };\n  const batch = batches[text(referenceRow.current_classbatch_id)] || null;\n  const seatsLeft = batch ? num(batch.max_batch_size) - num(batch.active_students_count) : 0;\n  if (!batch || seatsLeft <= 0) {\n    return output.push(block(row, 'R08', 'Batch ' + text(referenceRow.current_classbatch_id) + ' has no free seat for a paid renewal that arrived without a form.', 'ops_agent', 'High', 4));\n  }\n  approve(row, 'No teacher form was needed. Payment ' + money(num(invoice.net_amount)) + ' and the student record carry every field required to schedule batch ' + text(referenceRow.current_classbatch_id) + '.');\n  output.push(row);\n});\n\nreturn output.map((row) => ({ json: row }));"
+      },
+      "id": "reconcile",
+      "name": "Reconcile",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        0
+      ],
+      "notes": "Deterministic rules mirror of engine/rules.py. No LLM calls here."
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "AUTO_APPROVE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "auto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "EXCEPTION",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "exception"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "route",
+      "name": "Route",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1540,
+        0
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "auto_approved",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "append-auto-approved",
+      "name": "Append auto approved",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1760,
+        -220
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.bambinos.live/internal/renewals/bookings",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ invoice_id: $json.invoice_id, student_id: $json.student_id, classbatch_id: $json.classbatch_id, sessions: 24, source: 'renewal_engine' }) }}",
+        "options": {}
+      },
+      "id": "create-booking",
+      "name": "Create booking",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        -220
+      ],
+      "notes": "Writes the booking. Keep this node disabled until shadow mode ends."
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "exceptions",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "append-exceptions",
+      "name": "Append exceptions",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1760,
+        220
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-4.1-mini', temperature: 0.2, messages: [ { role: 'system', content: $('Reconcile').first().json.system_prompt }, { role: 'user', content: JSON.stringify($json) } ] }) }}",
+        "options": {}
+      },
+      "id": "draft-with-llm",
+      "name": "Draft with LLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        220
+      ],
+      "notes": "Optional. If this node errors, the next node keeps the template draft."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $json;\nconst draft = item.choices && item.choices[0] && item.choices[0].message && item.choices[0].message.content;\nreturn { json: { message: (draft || item.fallback_message || item.reason || '').trim() } };"
+      },
+      "id": "normalise-draft",
+      "name": "Normalise draft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        220
+      ],
+      "notes": "Falls back to the deterministic template when the LLM node fails."
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "renewals-exceptions",
+          "mode": "name"
+        },
+        "text": "={{ $json.message }}",
+        "otherOptions": {}
+      },
+      "id": "send-slack",
+      "name": "Send Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2420,
+        220
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Normalise draft').item.json.channel }}",
+              "rightValue": "WhatsApp",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "is-whatsapp",
+      "name": "Is WhatsApp",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2640,
+        220
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v20.0/PASTE_PHONE_NUMBER_ID/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $('Normalise draft').item.json.recipient, type: 'text', text: { body: $json.message } }) }}",
+        "options": {}
+      },
+      "id": "send-whatsapp",
+      "name": "Send WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2860,
+        120
+      ],
+      "notes": ""
+    }
+  ],
+  "connections": {
+    "Every 15 minutes": {
+      "main": [
+        [
+          {
+            "node": "Read invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read invoices": {
+      "main": [
+        [
+          {
+            "node": "Read forms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read forms": {
+      "main": [
+        [
+          {
+            "node": "Read bookings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read bookings": {
+      "main": [
+        [
+          {
+            "node": "Read schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read schedule": {
+      "main": [
+        [
+          {
+            "node": "Read reference",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read reference": {
+      "main": [
+        [
+          {
+            "node": "Reconcile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reconcile": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Append auto approved",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append exceptions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append auto approved": {
+      "main": [
+        [
+          {
+            "node": "Create booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append exceptions": {
+      "main": [
+        [
+          {
+            "node": "Draft with LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft with LLM": {
+      "main": [
+        [
+          {
+            "node": "Normalise draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalise draft": {
+      "main": [
+        [
+          {
+            "node": "Send Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Slack": {
+      "main": [
+        [
+          {
+            "node": "Is WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "versionId": "bambinos-renewal-1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

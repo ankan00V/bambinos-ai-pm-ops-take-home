@@ -1,0 +1,10 @@
+{
+  "monthly_renewals": 1000,
+  "ops_hourly_cost_inr": 300,
+  "one_time_build_cost_inr": 200000,
+  "auto_approval_rate_low": 0.55,
+  "auto_approval_rate_base": 0.70,
+  "auto_approval_rate_high": 0.8,
+  "context_switch_allowance_pct": 0.25,
+  "automation_overhead_pct": 0.1
+}

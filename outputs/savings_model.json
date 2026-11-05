@@ -1,0 +1,86 @@
+{
+  "assumptions": {
+    "monthly_renewals": 1000,
+    "ops_hourly_cost_inr": 300,
+    "one_time_build_cost_inr": 200000,
+    "context_switch_allowance_pct": 0.25,
+    "automation_overhead_pct": 0.1,
+    "source": "engine/savings_assumptions.json"
+  },
+  "observed_case_mix": {
+    "R17": 1,
+    "R20": 1,
+    "R00": 6,
+    "R12": 1,
+    "R08": 1,
+    "R06": 1,
+    "R07": 1,
+    "R09": 1
+  },
+  "scenarios": {
+    "low": {
+      "auto_approval_rate": 0.55,
+      "manual_mean_minutes": 8.42,
+      "today_minutes_per_case": 10.53,
+      "new_minutes_per_case": 1.69,
+      "exception_new_minutes": 3.42,
+      "hours_today_per_month": 175.5,
+      "hours_new_per_month": 28.1,
+      "hours_saved_per_month": 147.3,
+      "hours_saved_per_year": 1768.0,
+      "cost_today_per_month_inr": 52644,
+      "cost_new_per_month_inr": 8444,
+      "cost_saved_per_month_inr": 44200,
+      "cost_saved_per_year_inr": 530406,
+      "payback_months": 4.5
+    },
+    "base": {
+      "auto_approval_rate": 0.7,
+      "manual_mean_minutes": 8.42,
+      "today_minutes_per_case": 10.53,
+      "new_minutes_per_case": 1.22,
+      "exception_new_minutes": 3.42,
+      "hours_today_per_month": 175.5,
+      "hours_new_per_month": 20.3,
+      "hours_saved_per_month": 155.2,
+      "hours_saved_per_year": 1862.0,
+      "cost_today_per_month_inr": 52644,
+      "cost_new_per_month_inr": 6088,
+      "cost_saved_per_month_inr": 46557,
+      "cost_saved_per_year_inr": 558681,
+      "payback_months": 4.3
+    },
+    "high": {
+      "auto_approval_rate": 0.8,
+      "manual_mean_minutes": 8.42,
+      "today_minutes_per_case": 10.53,
+      "new_minutes_per_case": 0.9,
+      "exception_new_minutes": 3.42,
+      "hours_today_per_month": 175.5,
+      "hours_new_per_month": 15.1,
+      "hours_saved_per_month": 160.4,
+      "hours_saved_per_year": 1925.0,
+      "cost_today_per_month_inr": 52644,
+      "cost_new_per_month_inr": 4517,
+      "cost_saved_per_month_inr": 48128,
+      "cost_saved_per_year_inr": 577531,
+      "payback_months": 4.2
+    }
+  },
+  "base": {
+    "auto_approval_rate": 0.7,
+    "manual_mean_minutes": 8.42,
+    "today_minutes_per_case": 10.53,
+    "new_minutes_per_case": 1.22,
+    "exception_new_minutes": 3.42,
+    "hours_today_per_month": 175.5,
+    "hours_new_per_month": 20.3,
+    "hours_saved_per_month": 155.2,
+    "hours_saved_per_year": 1862.0,
+    "cost_today_per_month_inr": 52644,
+    "cost_new_per_month_inr": 6088,
+    "cost_saved_per_month_inr": 46557,
+    "cost_saved_per_year_inr": 558681,
+    "payback_months": 4.3
+  }
+}

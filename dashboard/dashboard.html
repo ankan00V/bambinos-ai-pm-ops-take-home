@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Renewal ops dashboard</title>
+<style>
+:root { --ink:#15191f; --muted:#66707d; --line:#e3e7ec; --bg:#f6f7f9; --card:#ffffff; --accent:#1f5f8b; --good:#1c7c54; --warn:#a8641a; --alert:#a33131; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+header { background:#101418; color:#fff; padding:22px 32px; }
+header h1 { margin:0 0 4px; font-size:20px; font-weight:600; letter-spacing:-0.2px; }
+header p { margin:0; color:#9aa4b0; font-size:12.5px; }
+main { padding:24px 32px 40px; max-width:1180px; }
+.tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.tile { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px 16px; }
+.tile-label { font-size:11px; text-transform:uppercase; letter-spacing:.7px; color:var(--muted); }
+.tile-value { font-size:26px; font-weight:600; margin:6px 0 2px; font-variant-numeric:tabular-nums; }
+.tile-note { font-size:11.5px; color:var(--muted); }
+.tile.alert .tile-value { color:var(--alert); }
+.tile.warn .tile-value { color:var(--warn); }
+.tile.good .tile-value { color:var(--good); }
+.grid { display:grid; grid-template-columns:1.35fr 1fr; gap:14px; margin-top:18px; }
+section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 18px; }
+section h2 { margin:0 0 12px; font-size:13px; text-transform:uppercase; letter-spacing:.7px; color:var(--muted); font-weight:600; }
+table { width:100%; border-collapse:collapse; font-size:12.5px; }
+th { text-align:left; font-weight:600; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.5px; padding:0 8px 8px 0; border-bottom:1px solid var(--line); }
+td { padding:8px 8px 8px 0; border-bottom:1px solid var(--line); }
+tr:last-child td { border-bottom:none; }
+.mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
+.num { text-align:right; font-variant-numeric:tabular-nums; }
+.pill { display:inline-block; padding:2px 7px; border-radius:99px; background:#eef1f4; font-family:ui-monospace,Menlo,monospace; font-size:11px; }
+.chart { width:100%; height:auto; }
+.hint { font-size:11px; color:#66707d; margin:-8px 0 8px; }
+.bar { fill:#2f6f9e; }
+.bar-label { font-size:11.5px; fill:#3a434e; }
+.bar-value { font-size:11.5px; fill:#66707d; }
+footer { margin-top:18px; font-size:11.5px; color:var(--muted); line-height:1.6; }
+@media print { body { background:#fff; } main { padding:16px; } .tile, section { break-inside:avoid; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Renewal operations</h1>
+  <p>Data as of 2026-11-03 18:00:00 &middot; engine 1.0.0 &middot; 13 cases &middot; shadow mode</p>
+</header>
+<main>
+  <div class="tiles"><div class="tile alert"><div class="tile-label">Stuck invoices over 12h</div><div class="tile-value">6</div><div class="tile-note">of 12 paid renewals</div></div><div class="tile "><div class="tile-label">Blocking exceptions</div><div class="tile-value">6</div><div class="tile-note">3 owners engaged</div></div><div class="tile warn"><div class="tile-label">Unscheduled bookings</div><div class="tile-value">3 of 4</div><div class="tile-note">75% of all bookings</div></div><div class="tile good"><div class="tile-label">Auto approval rate</div><div class="tile-value">46%</div><div class="tile-note">6 of 13 cases</div></div><div class="tile good"><div class="tile-label">Hours saved per month</div><div class="tile-value">155</div><div class="tile-note">at 1,000 renewals, base case</div></div><div class="tile alert"><div class="tile-label">Collected with no class</div><div class="tile-value">INR 126,850</div><div class="tile-note">92% of collected</div></div></div>
+  <div class="grid">
+    <section>
+      <h2>Stuck invoices over 12 hours</h2>
+      <table>
+        <thead><tr><th>Invoice</th><th>Student</th><th>Batch</th><th>Booking</th><th>Waiting</th><th>Code</th></tr></thead>
+        <tbody><tr><td class='mono'>84902</td><td>Di***a Na***r</td><td class='mono'>9202</td><td>Pending_Batch_Allocation</td><td class='mono'>51.7h</td><td><span class='pill'>R20</span></td></tr><tr><td class='mono'>84903</td><td>Ka***r Ve***a</td><td class='mono'>9203</td><td>no booking</td><td class='mono'>32.9h</td><td><span class='pill'>R00</span></td></tr><tr><td class='mono'>84904</td><td>An***a Iy***r</td><td class='mono'>9201</td><td>no booking</td><td class='mono'>30.5h</td><td><span class='pill'>R12</span></td></tr><tr><td class='mono'>84905</td><td>Re***h Pa***l</td><td class='mono'>9205</td><td>Failed_Batch_Full</td><td class='mono'>28.8h</td><td><span class='pill'>R08</span></td></tr><tr><td class='mono'>84906</td><td>Zo***a Kh***n</td><td class='mono'>9206</td><td>no booking</td><td class='mono'>26.0h</td><td><span class='pill'>R00</span></td></tr><tr><td class='mono'>84907</td><td>Vi***n Jo***i</td><td class='mono'>9207</td><td>no booking</td><td class='mono'>23.2h</td><td><span class='pill'>R00</span></td></tr></tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Exceptions by owner</h2>
+      <table>
+        <thead><tr><th>Owner</th><th>Open</th></tr></thead>
+        <tbody><tr><td>ops_agent</td><td class='mono'>3</td></tr><tr><td>parent</td><td class='mono'>2</td></tr><tr><td>finance</td><td class='mono'>1</td></tr></tbody>
+      </table>
+      <h2 style="margin-top:20px">By reason code</h2><p class="hint">Each code fired once in this sample.</p>
+      <svg viewBox="0 0 640 252" class="chart" role="img"><text x="0" y="18" class="bar-label">R04 Duplicate form for the same invoice</text><rect x="270" y="4" width="330" height="18" rx="3" class="bar"></rect><text x="608" y="18" class="bar-value">1</text><text x="0" y="54" class="bar-label">R06 Part payment received</text><rect x="270" y="40" width="330" height="18" rx="3" class="bar"></rect><text x="608" y="54" class="bar-value">1</text><text x="0" y="90" class="bar-label">R07 Payment not completed</text><rect x="270" y="76" width="330" height="18" rx="3" class="bar"></rect><text x="608" y="90" class="bar-value">1</text><text x="0" y="126" class="bar-label">R08 Batch at capacity</text><rect x="270" y="112" width="330" height="18" rx="3" class="bar"></rect><text x="608" y="126" class="bar-value">1</text><text x="0" y="162" class="bar-label">R09 Batch change requested</text><rect x="270" y="148" width="330" height="18" rx="3" class="bar"></rect><text x="608" y="162" class="bar-value">1</text><text x="0" y="198" class="bar-label">R12 Payer contact does not match the student r</text><rect x="270" y="184" width="330" height="18" rx="3" class="bar"></rect><text x="608" y="198" class="bar-value">1</text><text x="0" y="234" class="bar-label">R20 Approved but never scheduled</text><rect x="270" y="220" width="330" height="18" rx="3" class="bar"></rect><text x="608" y="234" class="bar-value">1</text></svg>
+    </section>
+  </div>
+  <div class="grid">
+    <section>
+      <h2>Open blocking exceptions</h2>
+      <table>
+        <thead><tr><th>Case</th><th>Student</th><th>Code</th><th>Severity</th><th>Owner</th><th>SLA</th><th>Open</th></tr></thead>
+        <tbody><tr><td class='mono'>84902</td><td>Di***a Na***r</td><td class='mono'>R20</td><td>High</td><td>ops_agent</td><td class='mono'>4</td><td class='num'>49.0h</td></tr><tr><td class='mono'>84904</td><td>An***a Iy***r</td><td class='mono'>R12</td><td>Medium</td><td>ops_agent</td><td class='mono'>4</td><td class='num'>30.5h</td></tr><tr><td class='mono'>84905</td><td>Re***h Pa***l</td><td class='mono'>R08</td><td>High</td><td>ops_agent</td><td class='mono'>4</td><td class='num'>28.8h</td></tr><tr><td class='mono'>84909</td><td>Ad***t Ku***i</td><td class='mono'>R06</td><td>High</td><td>finance</td><td class='mono'>4</td><td class='num'>8.0h</td></tr><tr><td class='mono'>84911</td><td>Is***n Gu***a</td><td class='mono'>R07</td><td>High</td><td>parent</td><td class='mono'>24</td><td class='num'>5.2h</td></tr><tr><td class='mono'>84912</td><td>Ta***a Me***n</td><td class='mono'>R09</td><td>Medium</td><td>parent</td><td class='mono'>8</td><td class='num'>2.3h</td></tr></tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Today's numbers</h2>
+      <table>
+        <tbody>
+          <tr><td>Orphaned invoice rate</td><td class="num">16.7%</td></tr>
+          <tr><td>Orphaned value</td><td class="num">INR 29,000</td></tr>
+          <tr><td>Form submission lag, median</td><td class="num">27 min</td></tr>
+          <tr><td>Approval lag, median</td><td class="num">1.5 h</td></tr>
+          <tr><td>Payment to schedule, median</td><td class="num">1.75 h</td></tr>
+          <tr><td>Zero touch eligible</td><td class="num">67%</td></tr>
+          <tr><td>Open exception age, median</td><td class="num">18.4 h</td></tr>
+          <tr><td>Cost saved per month</td><td class="num">INR 46,557</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+  <footer>
+    Stuck means money received and no session row, older than 12 hours. Auto approval rate is cases pushed with no human edit over all cases.
+    Payment to schedule has a sample of 1, so read it as an anecdote rather than a baseline.
+    Cost saving assumes 1,000 renewals per month at INR 300 per ops hour, editable in engine/savings_assumptions.json.
+  </footer>
+</main>
+</body>
+</html>

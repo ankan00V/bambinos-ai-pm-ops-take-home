@@ -1,0 +1,14 @@
+invoice_id,invoice_number,student_id,student_name,educator_id,educator_name,classbatch_id,seats_used,seats_max,amount_collected,currency,payment_status,payment_type,paid_at,hours_since_payment,form_count,booking_count,booking_status,session_rows,future_sessions,stage,stuck_over_12h,interruption_risk,decision,primary_code
+84901,BMB-INV-2026-84901,68101,Aa***v Sh***a,1102,Ms. Rhea B***,9201,4,6,12000.0,INR,Paid,Full,2026-11-01 10:15:22,55.74,1,1,Completed,2,1,scheduled,No,No,ALREADY_PROCESSED,R17
+84902,BMB-INV-2026-84902,68102,Di***a Na***r,1108,Mr. Vikram S***,9202,5,6,10500.0,INR,Paid,Full,2026-11-01 14:20:10,51.66,1,1,Pending_Batch_Allocation,0,0,blocked,Yes,Yes,EXCEPTION,R20
+84903,BMB-INV-2026-84903,68103,Ka***r Ve***a,1115,Acharya Nancy S***,9203,3,6,9000.0,INR,Paid,Full,2026-11-02 09:05:44,32.9,1,0,,0,0,awaiting schedule,Yes,Yes,AUTO_APPROVE,R00
+84904,BMB-INV-2026-84904,68104,An***a Iy***r,1102,Ms. Rhea B***,9201,4,6,12000.0,INR,Paid,Full,2026-11-02 11:30:05,30.5,1,0,,0,0,blocked,Yes,Yes,EXCEPTION,R12
+84905,BMB-INV-2026-84905,68105,Re***h Pa***l,1122,Coach Arvind K***,9205,6,6,11000.0,INR,Paid,Full,2026-11-02 13:10:19,28.83,1,1,Failed_Batch_Full,0,0,blocked,Yes,Yes,EXCEPTION,R08
+84906,BMB-INV-2026-84906,68106,Zo***a Kh***n,1102,Ms. Rhea B***,9206,5,6,18000.0,INR,Paid,Full,2026-11-02 16:00:00,26.0,0,0,,0,0,awaiting schedule,Yes,Yes,AUTO_APPROVE,R00
+84907,BMB-INV-2026-84907,68107,Vi***n Jo***i,1125,Ms. Simran D***,9207,4,6,7600.0,INR,Paid,Full,2026-11-02 18:45:30,23.24,1,0,,0,0,awaiting schedule,Yes,Yes,AUTO_APPROVE,R00
+84908,BMB-INV-2026-84908,68108,Si***a Ma***a,1115,Acharya Nancy S***,9208,5,6,22000.0,INR,Paid,Full,2026-11-03 08:15:11,9.75,2,0,,0,0,awaiting schedule,No,Yes,AUTO_APPROVE,R00
+84909,BMB-INV-2026-84909,68109,Ad***t Ku***i,1108,Mr. Vikram S***,9209,4,6,5250.0,INR,Partially_Paid,Installment_1_of_2,2026-11-03 10:00:00,8.0,1,0,,0,0,blocked,No,Yes,EXCEPTION,R06
+84910,BMB-INV-2026-84910,68110,My***a Re***y,1122,Coach Arvind K***,9210,5,6,11000.0,INR,Paid,Full,2026-11-03 11:20:45,6.65,0,0,,0,0,awaiting schedule,No,Yes,AUTO_APPROVE,R00
+84911,BMB-INV-2026-84911,68111,Is***n Gu***a,1125,Ms. Simran D***,9211,5,6,12000.0,INR,Failed,Full,NULL,,1,0,,0,0,no payment,No,No,EXCEPTION,R07
+84912,BMB-INV-2026-84912,68112,Ta***a Me***n,1115,Acharya Nancy S***,9203,3,6,9000.0,INR,Paid,Full,2026-11-03 15:40:12,2.33,1,1,Awaiting_Parent_Batch_Selection,0,0,blocked,No,Yes,EXCEPTION,R09
+84913,BMB-INV-2026-84913,68113,De***a Me***a,1130,Ms. Mary M***,9213,4,6,11500.0,INR,Paid,Full,2026-11-03 16:50:00,1.17,1,0,,0,0,awaiting schedule,No,Yes,AUTO_APPROVE,R00

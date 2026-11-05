@@ -1,0 +1,214 @@
+{
+  "engine_version": "1.0.0",
+  "data_as_of": "2026-11-03 18:00:00",
+  "cases": {
+    "total": 13,
+    "auto_approved": 6,
+    "exceptions": 6,
+    "already_processed": 1
+  },
+  "auto_approved": 6,
+  "auto_approval_rate": 0.4615,
+  "zero_touch_eligible_rate": 0.6667,
+  "exceptions_total": 7,
+  "exceptions_blocking": 6,
+  "exceptions_by_reason": [
+    {
+      "code": "R04",
+      "label": "Duplicate form for the same invoice",
+      "count": 1,
+      "owner": "teacher",
+      "severity": "Low",
+      "blocking": "No"
+    },
+    {
+      "code": "R06",
+      "label": "Part payment received",
+      "count": 1,
+      "owner": "finance",
+      "severity": "High",
+      "blocking": "Yes"
+    },
+    {
+      "code": "R07",
+      "label": "Payment not completed",
+      "count": 1,
+      "owner": "parent",
+      "severity": "High",
+      "blocking": "Yes"
+    },
+    {
+      "code": "R08",
+      "label": "Batch at capacity",
+      "count": 1,
+      "owner": "ops_agent",
+      "severity": "High",
+      "blocking": "Yes"
+    },
+    {
+      "code": "R09",
+      "label": "Batch change requested",
+      "count": 1,
+      "owner": "parent",
+      "severity": "Medium",
+      "blocking": "Yes"
+    },
+    {
+      "code": "R12",
+      "label": "Payer contact does not match the student record",
+      "count": 1,
+      "owner": "ops_agent",
+      "severity": "Medium",
+      "blocking": "Yes"
+    },
+    {
+      "code": "R20",
+      "label": "Approved but never scheduled",
+      "count": 1,
+      "owner": "ops_agent",
+      "severity": "High",
+      "blocking": "Yes"
+    }
+  ],
+  "exceptions_by_owner": {
+    "ops_agent": 3,
+    "finance": 1,
+    "parent": 2
+  },
+  "flags": {
+    "R01": 2,
+    "R18": 2,
+    "R22": 1,
+    "R05": 1,
+    "R03": 1
+  },
+  "messages_drafted": 14,
+  "estimated_hours_saved_per_month": 155.2,
+  "estimated_cost_saved_per_month_inr": 46557,
+  "savings": {
+    "assumptions": {
+      "monthly_renewals": 1000,
+      "ops_hourly_cost_inr": 300,
+      "one_time_build_cost_inr": 200000,
+      "context_switch_allowance_pct": 0.25,
+      "automation_overhead_pct": 0.1,
+      "source": "engine/savings_assumptions.json"
+    },
+    "observed_case_mix": {
+      "R17": 1,
+      "R20": 1,
+      "R00": 6,
+      "R12": 1,
+      "R08": 1,
+      "R06": 1,
+      "R07": 1,
+      "R09": 1
+    },
+    "scenarios": {
+      "low": {
+        "auto_approval_rate": 0.55,
+        "manual_mean_minutes": 8.42,
+        "today_minutes_per_case": 10.53,
+        "new_minutes_per_case": 1.69,
+        "exception_new_minutes": 3.42,
+        "hours_today_per_month": 175.5,
+        "hours_new_per_month": 28.1,
+        "hours_saved_per_month": 147.3,
+        "hours_saved_per_year": 1768.0,
+        "cost_today_per_month_inr": 52644,
+        "cost_new_per_month_inr": 8444,
+        "cost_saved_per_month_inr": 44200,
+        "cost_saved_per_year_inr": 530406,
+        "payback_months": 4.5
+      },
+      "base": {
+        "auto_approval_rate": 0.7,
+        "manual_mean_minutes": 8.42,
+        "today_minutes_per_case": 10.53,
+        "new_minutes_per_case": 1.22,
+        "exception_new_minutes": 3.42,
+        "hours_today_per_month": 175.5,
+        "hours_new_per_month": 20.3,
+        "hours_saved_per_month": 155.2,
+        "hours_saved_per_year": 1862.0,
+        "cost_today_per_month_inr": 52644,
+        "cost_new_per_month_inr": 6088,
+        "cost_saved_per_month_inr": 46557,
+        "cost_saved_per_year_inr": 558681,
+        "payback_months": 4.3
+      },
+      "high": {
+        "auto_approval_rate": 0.8,
+        "manual_mean_minutes": 8.42,
+        "today_minutes_per_case": 10.53,
+        "new_minutes_per_case": 0.9,
+        "exception_new_minutes": 3.42,
+        "hours_today_per_month": 175.5,
+        "hours_new_per_month": 15.1,
+        "hours_saved_per_month": 160.4,
+        "hours_saved_per_year": 1925.0,
+        "cost_today_per_month_inr": 52644,
+        "cost_new_per_month_inr": 4517,
+        "cost_saved_per_month_inr": 48128,
+        "cost_saved_per_year_inr": 577531,
+        "payback_months": 4.2
+      }
+    },
+    "base": {
+      "auto_approval_rate": 0.7,
+      "manual_mean_minutes": 8.42,
+      "today_minutes_per_case": 10.53,
+      "new_minutes_per_case": 1.22,
+      "exception_new_minutes": 3.42,
+      "hours_today_per_month": 175.5,
+      "hours_new_per_month": 20.3,
+      "hours_saved_per_month": 155.2,
+      "hours_saved_per_year": 1862.0,
+      "cost_today_per_month_inr": 52644,
+      "cost_new_per_month_inr": 6088,
+      "cost_saved_per_month_inr": 46557,
+      "cost_saved_per_year_inr": 558681,
+      "payback_months": 4.3
+    }
+  },
+  "metrics": {
+    "cases_total": 13,
+    "paid_invoices": 12,
+    "orphaned_invoices": 2,
+    "orphaned_invoice_rate": 0.1667,
+    "orphaned_value_inr": 29000.0,
+    "stuck_invoices_over_12h": 6,
+    "stuck_invoice_rate": 0.5,
+    "paid_with_no_future_class": 11,
+    "class_interruption_rate": 0.9167,
+    "revenue_without_class_inr": 126850.0,
+    "collected_total_inr": 138850.0,
+    "form_submission_lag_hours_median": 0.45,
+    "form_submission_lag_samples": 10,
+    "approval_lag_hours_median": 1.54,
+    "approval_lag_samples": 4,
+    "payment_to_schedule_hours_median": 1.75,
+    "payment_to_schedule_samples": 1,
+    "unscheduled_booking_rate": 0.75,
+    "unscheduled_bookings": 3,
+    "bookings_total": 4,
+    "auto_approved_cases": 6,
+    "auto_approval_rate": 0.4615,
+    "zero_touch_eligible_cases": 8,
+    "zero_touch_eligible_rate": 0.6667,
+    "exceptions_blocking": 6,
+    "exceptions_informational": 0,
+    "open_exception_age_hours_median": 18.4,
+    "open_exception_age_hours_max": 49.0,
+    "first_pass_auto_approval_baseline": 0.0,
+    "already_processed_cases": 1
+  },
+  "llm_used": false,
+  "limits": [
+    "All names, phones and emails in the source files are masked, so fuzzy name matching is weak by construction and phone matching relies on the last visible digits.",
+    "The schedule table holds 2 rows for 12 paid renewals. Class interruption rate and payment to schedule turnaround are therefore computed on a partial export and should be re-run on a full schedule export before being quoted to the business.",
+    "Payment gateway settlement is taken from the invoice row. The engine never calls Razorpay or Stripe, so a paid status that is later reversed would not be caught.",
+    "Teacher phone numbers are not in the dataset, so WhatsApp recipients for teachers are names plus the staff directory in production.",
+    "The savings model is a volume scenario at 1,000 renewals per month. Observed volume in the file is 13 cases over 3 days."
+  ]
+}
