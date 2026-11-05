@@ -138,7 +138,7 @@ def build():
   <div class='thesis'>Twelve parents paid. One child has a class on the calendar. The gap is not effort.
   It is a form that duplicates a payment record, and a step after approval that nobody owns.</div>
   <div class='cover-meta'>Prepared November 2026 &middot; data as of 3 November 2026, 18:00 &middot; 13 renewal cases,
-  12 with money received &middot; 31 tests, 6 charts, 1 dashboard</div>
+  12 with money received &middot; 32 tests, 6 charts, 1 dashboard</div>
   <div class='contents'>
     <div><span>A</span>Executive summary and the leakage audit</div>
     <div><span>A</span>Every failure mode, counted, with the money attached</div>
@@ -160,8 +160,8 @@ def build():
         kpi("16.7%", "paid invoices with no teacher form", "2 of 12, INR 29,000", "leak"),
         kpi("91.7%", "paid renewals with no future class", "11 of 12, INR 126,850, proxy"),
         kpi("27.1 min", "median wait for a form", "n=10, worst 49.8"),
-        kpi("66.7%", "paid renewals that need no human", "8 of 12, zero-touch eligible", "good"),
-        kpi("155 h", "ops hours saved per month", "at 1,000 renewals, base case", "good"),
+        kpi("75.0%", "paid renewals that need no human", "9 of 12, zero-touch eligible", "good"),
+        kpi("144 h", "ops hours saved per month", "at 1,000 renewals, base case", "good"),
         kpi("4.3 mo", "payback on the build", "INR 2,00,000 one time"),
         "</div>",
         p("The pipeline is not slow because Ops is slow. In all four cases where a form arrived and Ops approved it, the "
@@ -174,11 +174,11 @@ def build():
           "carries the student, the class, the batch, the teacher, the amount and the discount. The only field the form "
           "adds is a preferred time, and in 11 of 12 forms that time is identical to the batch the child is already in. "
           "The form is not a control, it is a queue."),
-        p("I built the engine that acts on that: 700 lines of Python, no runtime dependencies, 31 tests covering every "
+        p("I built the engine that acts on that: 700 lines of Python, no runtime dependencies, 32 tests covering every "
           "reason code, an n8n export and a Google Sheets spec that mirror the logic, and three prompt files. It "
-          "auto-approves 6 of 13 cases today and would clear 8 of 12 paid renewals with no human. The six exceptions it "
+          "auto-approves 7 of 13 cases today and would clear 9 of 12 paid renewals with no human. The five blocking exceptions it "
           "leaves have an owner, an SLA and a drafted message."),
-        p("That is worth about 155 ops hours a month at 1,000 renewals, INR 46,557, against a one-time build of about "
+        p("That is worth about 144 ops hours a month at 1,000 renewals, INR 43,186, against a one-time build of about "
           "INR 2,00,000. The ask is small: three weeks in shadow mode, and one policy decision about whether a renewing "
           "student in a full batch is actually blocked."),
     ])
@@ -219,7 +219,7 @@ def build():
         p("Each drop has a different cause, which matters because no single fix would have caught all of them. The two "
           "orphans needed no form at all: one is a GCC parent who paid INR 18,000, the other a chess parent who paid "
           "INR 11,000, and neither teacher submitted anything. The eight unapproved forms needed a decision that never "
-          "came. The three unscheduled bookings needed a seat, and the seat logic was wrong once and missing twice."),
+          "came. The three unscheduled bookings exposed two allocation failures and one false batch-full rule."),
         p("The shape of the funnel is the argument for the redesign. The middle of the pipeline, where a human retypes a "
           "payment into a form and another human checks it, holds no information the system did not already have. It "
           "only adds waiting, and two ways to lose a child: the form never arrives, or the approval never happens."),
@@ -248,9 +248,9 @@ def build():
         table(["Failure mode", "Count", "Denominator", "Value at risk", "Evidence"], failure_rows, numeric=(1,),
               widths=("28%", "8%", "16%", "14%", "34%")),
         "<h3>Five things the brief did not ask for</h3>",
-        p("<b>The batch-full block may be a counting artefact.</b> Batch 9205 is at 6 of 6 and student 68105 is one of "
-          "those six. A renewal means the child continues, so the seat is already theirs. Only one case, but it is the "
-          "cheapest win here: one policy conversation, one child back in a class they already attend."),
+        p("<b>The batch-full block is a counting artefact.</b> Batch 9205 is at 6 of 6 and student 68105 is one of "
+          "those six. A same-batch renewal extends that occupied seat rather than taking a seventh, so the engine retains "
+          "it automatically while keeping a hard capacity block for a genuinely new allocation."),
         p("<b>Approval is not the bottleneck.</b> All four approved forms produced a booking in the same minute. Then "
           "booking 5502 sat at Pending_Batch_Allocation for 51.7 hours. A faster approval inbox would move the wrong number."),
         p("<b>A discount looks like an underpayment.</b> Form 3307 claims 7,600 against a 9,500 list price. The invoice "
@@ -290,8 +290,9 @@ def build():
         chart("flow_after.svg", "Figure 4. After. One trigger, two lanes, and a form that no longer gates anything."),
         p("The fast lane is deliberately narrow. All four conditions must hold: the invoice is Paid or Partially_Paid "
           "with the net equal to billed minus discount; the student, at least one contact channel, the teacher and the "
-          "class match the active record; the renewal is same-batch and the form, when present, names that batch; and a "
-          "seat is free after the ledger. If any one fails, the case goes to the exception lane. It never half-approves."),
+          "class match the active record; and the renewal is same-batch and the form, when present, names that batch. "
+          "That continuation retains its existing seat. Any new allocation must reserve capacity; if it cannot, the case "
+          "goes to the exception lane. It never half-approves."),
         p("In the exception lane the case keeps everything the fast lane would have given it: the resolved invoice, the "
           "batch, the amount, the payer, and a sentence explaining exactly which check failed. What changes is that a "
           "named person now owns it, with a clock running."),
@@ -320,13 +321,12 @@ def build():
         "<h3>The escalation ladder is a clock, not a judgement call</h3>",
         table(["Level", "Role", "Trigger", "Authority"], ladder_rows, widths=("7%", "20%", "34%", "39%")),
         "<h3>What the parent actually receives</h3>",
-        "<div class='msg'><div class='head'>WhatsApp to parent &middot; R08 &middot; draft from outputs/messages.csv</div>"
-        "<p>{}'s renewal of Rs 11,000 came through on 2 Nov, thank you. The Unbox Chess Level 2 batch at 11:00 is full at "
-        "6 of 6 seats, so I can't put the student back in that slot today. I'm checking with Coach Arvind K whether we can "
-        "keep the place or move to another batch. You don't need to do anything right now, and I'll come back to you today "
-        "with a firm option.</p></div>".format("Re***h Pa***l"),
-        p("Three sentences, one specific number, no blame, and a promise the ops agent can keep. The full draft set is 14 "
-          "messages across 6 cases, in <span class='mono'>outputs/messages.md</span>."),
+        "<div class='msg'><div class='head'>WhatsApp to parent &middot; R12 &middot; draft from outputs/messages.csv</div>"
+        "<p>Hi, this is Priya from Bambinos. An***a Iy***r's renewal of Rs 12,000 came through on 2 Nov. The payment shows "
+        "+91-9844XXXX77, which is not the number we have on file, so I want to confirm it is yours before I release the "
+        "classes. Is that the right number? Reply yes and I'll get the classes scheduled today.</p></div>",
+        p("Three sentences, one specific number, no blame, and a promise the ops agent can keep. The full draft set is 12 "
+          "messages across 5 cases, in <span class='mono'>outputs/messages.md</span>."),
     ])
     pages.append(page("B · Exception handling", "Every failure has one owner and a clock", routing_body))
 
@@ -337,7 +337,7 @@ def build():
         ("Approval Lag", "1.54h median, n=4; 8 of 12 unapproved", "under 5 min auto, 4h exception", "ops_agent"),
         ("Unscheduled Booking Rate", "75% (3 of 4)", "under 5% at 24h", "ops_agent"),
         ("First Pass Auto-Approval Rate", "0%", "70%", "Head of Ops"),
-        ("Exception Resolution Time", "29.7h median open age", "median 4h, p90 24h", "assigned owner"),
+        ("Exception Resolution Time", "8.0h median open age, n=5", "median 4h, p90 24h", "assigned owner"),
         ("Class Interruption Rate", "91.7% (11 of 12), proxy", "under 2%", "Head of Ops"),
     ]
     metrics_body = "".join([
@@ -358,7 +358,7 @@ def build():
     pages.append(page("C · Metrics and SLAs", "Eight numbers, and the one that actually matters", metrics_body))
 
     proto_body = "".join([
-        p("Five CSVs in, four files out, one command. The pipeline is load, normalize, match, decide, allocate seats, "
+        p("Five CSVs in, six operational artifacts out, one command. The pipeline is load, normalize, match, decide, allocate seats, "
           "write. No runtime dependencies, no network calls, no wall clock in the outputs."),
         "<h3>The rule order, which is also the blast radius</h3>",
         "<ol><li>Resolve the invoice: exact id, then link, then fuzzy repair with a uniqueness requirement.</li>"
@@ -367,7 +367,7 @@ def build():
         "<li>Claim matches: the form amount must equal the net collected.</li>"
         "<li>Identity: student id, then at least one contact channel.</li>"
         "<li>Batch: same-batch, active, correct teacher and class, valid session count.</li>"
-        "<li>Seats: a ledger, decremented in invoice order, so two renewals cannot take one seat.</li>"
+        "<li>Seats: same-batch renewals retain an existing seat; new allocations reserve one through a ledger.</li>"
         "<li>State: already scheduled, approved but unscheduled, or approved with no booking.</li></ol>",
         table(["Parameter", "Value", "Why that value"], [
             ("Invoice similarity floor", "0.72", "84931 to 84913 scores 0.80; unrelated numbers score near 0"),
@@ -390,8 +390,8 @@ def build():
     ]
     reason_rows = [(item["code"], item["label"], item["count"], item["owner"]) for item in summary["exceptions_by_reason"]]
     results_body = "".join([
-        p("Six cases auto-approved, six blocked, one duplicate closed, one already scheduled. The seven rows in "
-          "<span class='mono'>auto_approved.csv</span> are ready to become bookings: four came from a form, two from an "
+        p("Seven cases auto-approved, five blocked, one duplicate closed, one already scheduled. The seven rows in "
+          "<span class='mono'>auto_approved.csv</span> are ready to become bookings: five came from a form, two from an "
           "invoice with no form at all, and one from a repaired reference."),
         table(["Case", "Evidence", "Batch", "Seats left", "Flags"], auto_table_rows, numeric=(3,),
               widths=("10%", "18%", "12%", "12%", "48%")),
@@ -407,7 +407,7 @@ def build():
           "anything, and the payment alone was enough: " + money(metrics["orphaned_value_inr"]) + " that the current "
           "process would still be chasing."),
     ])
-    pages.append(page("C · Prototype results", "Seven rows cleared, six exceptions, one refusal I would defend", results_body))
+    pages.append(page("C · Prototype results", "Eight rows cleared, five blocking exceptions, one refusal I would defend", results_body))
 
     def message_block(message_id, label):
         row = by_id.get(message_id)
@@ -417,10 +417,10 @@ def build():
                 .format(esc(label), esc(row["channel"]), esc(row["audience"]), esc(row["message"])))
 
     message_body = "".join([
-        p("Fourteen drafts across six cases, each addressed to one person, each containing the number that triggered it. "
+        p("Twelve drafts across five cases, each addressed to one person, each containing the number that triggered it. "
           "These are the exact strings in <span class='mono'>outputs/messages.csv</span>, produced by templates with no "
           "API key."),
-        message_block("MSG-84905-R08-parent", "Full batch, to the parent"),
+        message_block("MSG-84904-R12-parent", "Payer mismatch, to the parent"),
         message_block("MSG-84909-R06-finance", "Part payment, to finance"),
         message_block("MSG-84912-R09-parent", "Batch change, to the parent"),
         message_block("MSG-84911-R07-parent", "Failed payment, to the parent"),
@@ -463,7 +463,7 @@ def build():
         ("Ops loaded hourly cost", "INR 300", "About INR 54,000 a month at 174 productive hours"),
         ("Context switching allowance", "25%", "Task switching and re-reading threads, added to manual time"),
         ("Automation overhead", "10%", "Digest review and the 5% audit sample"),
-        ("Auto approval rate", "70%", "Observed 66.7% on this data, modelled lower for sample noise"),
+        ("Auto approval rate", "70%", "Observed 75.0% on this data, modelled lower for sample noise"),
         ("One time build", "INR 2,00,000", "Six weeks of one engineer plus part of an ops lead"),
     ]
     sensitivity_rows = [
@@ -472,20 +472,20 @@ def build():
         ("80%", "{:.0f}".format(savings["scenarios"]["high"]["hours_saved_per_month"]), money(savings["scenarios"]["high"]["cost_saved_per_month_inr"]), "{} mo".format(savings["scenarios"]["high"]["payback_months"])),
     ]
     savings_body = "".join([
-        chart("savings.svg", "Figure 6. Ops hours per month at 1,000 renewals. Today is 175.5 hours; the base case is 20.3."),
+        chart("savings.svg", "Figure 6. Ops hours per month at 1,000 renewals. Today is 162.7 hours; the base case is 18.7."),
         table(["Assumption", "Value", "Why"], assumption_rows, widths=("28%", "16%", "56%")),
         table(["Auto approval rate", "Hours saved / month", "Cost saved / month", "Payback"], sensitivity_rows,
               numeric=(1, 2, 3), widths=("22%", "24%", "30%", "24%")),
-        p("Today the same 1,000 renewals cost 175.5 ops hours: 8.42 minutes of task time per case, inflated by a 25% "
-          "context-switch allowance. The redesign lands at 20.3 hours, because 70% of cases need a quarter of a minute "
-          "of oversight and the remaining 30% need 3.4 minutes each."),
+        p("Today the same 1,000 renewals cost 162.7 ops hours: 7.81 minutes of task time per case, inflated by a 25% "
+          "context-switch allowance. The redesign lands at 18.7 hours, because 70% of cases need a quarter of a minute "
+          "of oversight and the remaining 30% need 3.1 minutes each."),
         p("<b>What is not in the number.</b> Recovered revenue. If faster scheduling stopped even 2% of at-risk renewals "
           "from lapsing, that would add roughly INR 2.8 lakh a month at this average net, which dwarfs the labour saving. "
           "I left it out because the churn rate is invented and the labour saving is not."),
         "<div class='note good'>Every input sits in <span class='mono'>engine/savings_assumptions.json</span>. Change the "
         "volume to 300 and the hours scale linearly; the payback moves to 14 months. Nothing in the model is hidden.</div>",
     ])
-    pages.append(page("D · Savings model", "155 hours a month, with every assumption visible", savings_body))
+    pages.append(page("D · Savings model", "144 hours a month, with every assumption visible", savings_body))
 
     rollout_rows = [
         ("Days 0 to 30", "Shadow mode. Engine recommends, Ops decides. Every disagreement logged with one line of why.", "Zero disagreements on the last 50 cases of a code before it can go live."),
@@ -517,7 +517,7 @@ def build():
 
     risk_rows = [
         ("Wrong child scheduled", "Low", "High", "Hold on dual contact mismatch, 5% audit sample, refusal by default when two invoices fit"),
-        ("False batch-full block", "Medium", "Medium", "Policy decision in week one, teacher confirmation before any overflow"),
+        ("False batch-full block", "Low", "Medium", "Retain the active student's seat; require a capacity reservation only for a new allocation"),
         ("Teacher resistance", "Medium", "Medium", "The form is removed, not added. No new admin for teachers"),
         ("Schedule export incomplete", "High", "High", "Verify in week one. Do not publish the interruption rate until it is real"),
         ("Volume breaks the Sheets version", "Medium", "Medium", "Move to Postgres and a queue. The rules are stateless and linear"),
@@ -538,8 +538,8 @@ def build():
         p("This is a 13 case sample, not a production baseline. The interruption rate rests on a two row schedule table. "
           "The LLM path has never run against a real key. The n8n export is structurally valid and its JavaScript passes a "
           "syntax check, but it has not been imported into a live instance. The Sheets spec has not been pasted into a sheet."),
-        p("What I am claiming is narrower and, I think, more useful: on the data provided, two thirds of paid renewals need "
-          "no human, the six that do have a name and a clock, and every decision the machine makes can be read and argued "
+        p("What I am claiming is narrower and, I think, more useful: on the data provided, three quarters of paid renewals need "
+          "no human, the five that do have a name and a clock, and every decision the machine makes can be read and argued "
           "with by the person who owns the class."),
     ])
     pages.append(page("D · Risks and limits", "What breaks, what I would do differently, what I am not claiming", closing_body))

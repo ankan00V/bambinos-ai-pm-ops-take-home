@@ -50,6 +50,7 @@ def new_decision(case_key, record_type, record_id, dataset):
         "reason": "",
         "match_method": "",
         "match_score": "",
+        "capacity_action": "",
         "seats_left_after": "",
         "data_as_of": dataset.as_of.strftime("%Y-%m-%d %H:%M:%S"),
         "_state_since": None,
@@ -98,6 +99,15 @@ def seats_available(dataset, batch_id):
     if not batch:
         return None
     return to_int(batch.get("max_batch_size")) - to_int(batch.get("active_students_count"))
+
+
+def retains_existing_seat(row, dataset):
+    """A same-batch renewal extends an occupied seat; it does not take a new one."""
+    reference = dataset.reference_by_student.get(text(row.get("student_id")), {})
+    return (
+        text(row.get("continue_same_batch")).lower() == "yes"
+        and text(row.get("classbatch_id")) == text(reference.get("current_classbatch_id"))
+    )
 
 
 def age_hours(row, dataset):
@@ -637,6 +647,11 @@ def allocate_seats(decisions, dataset):
         if not batch:
             block(row, "R23", "Batch {} is not in the active reference, so no seat can be confirmed.".format(batch_id))
             continue
+        if retains_existing_seat(row, dataset):
+            row["capacity_action"] = "retain_existing_seat"
+            row["seats_left_after"] = max(0, to_int(batch.get("max_batch_size")) - to_int(batch.get("active_students_count")))
+            row["reason"] += " The student already occupies this batch; the renewal retains that seat and consumes no additional capacity."
+            continue
         if batch_id not in ledger:
             ledger[batch_id] = to_int(batch.get("active_students_count"))
         seats_left = to_int(batch.get("max_batch_size")) - ledger[batch_id]
@@ -664,6 +679,7 @@ def allocate_seats(decisions, dataset):
             )
             continue
         ledger[batch_id] += 1
+        row["capacity_action"] = "reserve_new_seat"
         row["seats_left_after"] = seats_left - 1
 
 

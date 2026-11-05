@@ -18,7 +18,7 @@ Show the terminal.
 
 Run `python3 engine/run.py`.
 
-"Thirteen cases. Six auto-approved, six blocked, one duplicate closed, one already scheduled. Zero-touch eligible is sixty six point seven percent of paid invoices. It also prints the leak numbers and the savings model."
+"Thirteen cases. Seven auto-approved, five blocked, one duplicate closed, one already scheduled. Zero-touch eligible is seventy five percent of paid invoices. It also prints the leak numbers and the savings model."
 
 ## 1:20 to 1:50, the auto-approved file
 

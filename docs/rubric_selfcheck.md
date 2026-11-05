@@ -6,7 +6,7 @@ The four rubric dimensions, what I built for each, and where to look.
 | --- | --- | --- | --- |
 | Problem discovery and edge cases | 25% | Every hypothesis in the brief tested with a count and a denominator, including the ones that produced zero. Five failure modes the brief did not list, each with evidence. Join reliability ranked by actual match rates. | `docs/findings.md`, `docs/data_profile.md`, `outputs/decisions.csv` |
 | Process re-engineering | 25% | The form is eliminated as a trigger for clean renewals, with the arithmetic that justifies it. Fast lane defined by four conditions. Five exception types with owners, SLAs and escalation. Change management and rollback in the report. | `README.md`, `docs/metrics_slas.md`, `report/report.pdf` sections B and D |
-| AI and no-code execution | 25% | Working Python engine, 31 tests across every reason code, n8n export with an embedded rules mirror, a Google Sheets formula spec, three prompt files, drafted messages in two channels with template fallback. | `engine/`, `workflows/`, `prompts/`, `outputs/` |
+| AI and no-code execution | 25% | Working Python engine, 32 tests across every reason code, n8n export with an embedded rules mirror, a Google Sheets formula spec, three prompt files, drafted messages in two channels with template fallback. | `engine/`, `workflows/`, `prompts/`, `outputs/` |
 | Data, SLAs and ownership | 25% | Eight metrics with formulas, baselines and targets. Per-code SLA table and a four level escalation ladder. Editable savings model with sensitivity. Dashboard built from real outputs. | `docs/metrics_slas.md`, `outputs/savings_model.csv`, `dashboard/dashboard.html` |
 
 ## Specific rubric phrases and where they are answered

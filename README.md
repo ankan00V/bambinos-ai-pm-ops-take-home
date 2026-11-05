@@ -28,7 +28,7 @@ python3 engine/run.py --llm
 
 | File | Contents |
 | --- | --- |
-| `outputs/auto_approved.csv` | Rows ready for `class_schedule_bookings`, with batch, sessions, seat count after approval and a readable reason |
+| `outputs/auto_approved.csv` | Rows ready for `class_schedule_bookings`, with batch, sessions, explicit capacity action, and a readable reason |
 | `outputs/exceptions.csv` | One row per flagged case with reason code, severity, blocking flag, owner, escalation, SLA, hours open, recommended action and reason |
 | `outputs/messages.csv` and `messages.md` | Drafted WhatsApp and Slack messages per exception, addressed to the right person, with the number that triggered it |
 | `outputs/summary.json` | Counts, auto-approval rate, exceptions by reason and owner, metric baselines, savings, limits |
@@ -42,9 +42,9 @@ Data as of 2026-11-03 18:00, the latest timestamp in the files.
 | Measure | Value |
 | --- | --- |
 | Renewal cases | 13 |
-| Auto-approved with no human | 6, 46.2% of cases |
-| Zero-touch eligible | 8 of 12 paid invoices, 66.7% |
-| Blocking exceptions | 6 |
+| Auto-approved with no human | 7, 53.8% of cases |
+| Zero-touch eligible | 9 of 12 paid invoices, 75.0% |
+| Blocking exceptions | 5 |
 | Informational rows | 1 duplicate form |
 | Already scheduled | 1 |
 | Paid invoices with no form | 2, 16.7%, INR 29,000 |
@@ -52,12 +52,12 @@ Data as of 2026-11-03 18:00, the latest timestamp in the files.
 | Payment to form, median | 27.1 minutes, n=10 |
 | Form to approval, median | 1.54 hours, n=4 |
 | Payment to first session | 1.75 hours, n=1 |
-| Hours saved per month | 155.2 at 1,000 renewals, base case |
-| Cost saved per month | INR 46,557 at INR 300 per ops hour |
+| Hours saved per month | 144.0 at 1,000 renewals, base case |
+| Cost saved per month | INR 43,186 at INR 300 per ops hour |
 
-The six exceptions are R20 approved but never scheduled, R12 payer contact mismatch, R08 batch at capacity, R09 batch change, R06 part payment, R07 payment not completed.
+The five blocking exceptions are R20 approved but never scheduled, R12 payer contact mismatch, R09 batch change, R06 part payment, and R07 payment not completed. One duplicate form is closed as informational.
 
-`auto_approval_rate` is 46.2% because this snapshot includes a failed payment, an already scheduled case, and four cases that genuinely need a human. The forward-looking number is the zero-touch rate of 66.7%, which counts cases that would clear with no human if the engine ran from a clean state.
+`auto_approval_rate` is 53.8% because this snapshot includes a failed payment, an already scheduled case, and five cases that genuinely need a human. The forward-looking number is the zero-touch rate of 75.0%, which counts cases that would clear with no human if the engine ran from a clean state.
 
 ## Design decisions
 
@@ -71,11 +71,11 @@ The six exceptions are R20 approved but never scheduled, R12 payer contact misma
 
 **Blocking versus informational.** A reason code either stops scheduling or it does not. R04 duplicate and R18 cross-border are informational. R12 payer mismatch blocks, because the payment's contact details match nothing on file and a two minute call settles it.
 
-**Seats are a ledger, not a lookup.** Approvals are processed in invoice order and each one decrements the batch. Two renewals into the last free seat cannot both pass. The reference count alone would let them.
+**Renewals retain seats; transfers reserve them.** A student already assigned to the requested batch keeps that seat even when the roster reads 6 of 6; a renewal is an extension, not another child. Any future automatic transfer must reserve capacity through a ledger, so two transfers into the last free seat cannot both pass.
 
 **Idempotent by construction.** No wall clock in any output, deterministic ordering, and a state check that skips cases which already have session rows. `test_run_is_idempotent` compares bytes across two runs.
 
-**Explainability over coverage.** Each row carries a sentence with the actual numbers, for example "Batch 9205 (CM-G4-Batch-D) is at 6 of 6 seats. INR 11,000 cleared 28.8 hours ago". An ops person can read the CSV without opening the code.
+**Explainability over coverage.** Each row carries a sentence with the actual numbers, for example "The student already occupies this batch; the renewal retains that seat and consumes no additional capacity." An ops person can read the CSV without opening the code.
 
 ## Repo layout
 
@@ -92,7 +92,7 @@ report/                 report source, charts and the PDF
 
 ## Tests
 
-31 tests cover every reason code from R00 to R24, the phone and email normalizers, the invoice reference parser, the fuzzy tie-break, idempotency, and the rule that every blocking exception has an owner, an SLA and a message. Fixtures are built by copying the real CSVs and mutating one row, so the tests exercise the same schema as production.
+32 tests cover every live decision path, the phone and email normalizers, the invoice reference parser, the fuzzy tie-break, same-batch seat retention, capacity protection for a new allocation, idempotency, and the rule that every blocking exception has an owner, an SLA and a message. Fixtures are built by copying the real CSVs and mutating one row, so the tests exercise the same schema as production.
 
 ## Limitations
 
@@ -100,5 +100,5 @@ report/                 report source, charts and the PDF
 - **Masked identities.** Names and numbers are masked, so fuzzy name matching cannot be validated here. The name score is weak by design and never gates a decision.
 - **No gateway call.** Payment status is taken from the invoice row. A late settlement or a chargeback is invisible to the engine.
 - **Volume is an assumption.** 13 cases over three days is a sample. The savings model runs at 1,000 renewals per month and every input is in `engine/savings_assumptions.json`.
-- **The n8n mirror is close but not identical.** It lacks the seat ledger and its message copy is shorter, because a Code node is the wrong place for the full template set. The Python engine is the reference implementation.
+- **The n8n mirror is close but not identical.** It needs the same retain-existing-seat rule before production use, and its message copy is shorter. The Python engine is the reference implementation.
 - **The LLM path is unexercised in this repo.** No key was available, so the fallback templates are what produced `outputs/messages.csv`. The integration is real but its output has not been reviewed.

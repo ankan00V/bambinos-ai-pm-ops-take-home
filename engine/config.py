@@ -12,7 +12,7 @@ BOOKING_FILE = "3_booking_requests.csv"
 SCHEDULE_FILE = "4_class_schedule_bookings.csv"
 REFERENCE_FILE = "reference_active_batches_and_students.csv"
 
-ENGINE_VERSION = "1.0.0"
+ENGINE_VERSION = "1.1.0"
 
 INVOICE_SIMILARITY_MIN = 0.72
 INVOICE_MARGIN_MIN = 0.05

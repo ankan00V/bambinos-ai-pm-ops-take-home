@@ -43,13 +43,13 @@ Owner: ops_agent.
 
 Formula: renewal cases that reach a booking with no human edit divided by all renewal cases.
 Baseline: **0%**. Every one of the 12 forms carries either an `approved_by` value or no approval at all. Nothing in the current flow can approve itself.
-Target: **70%**, with 66.7% demonstrated on this dataset.
+Target: **70%**, with 75.0% demonstrated on this dataset.
 Owner: Head of Ops.
 
 **7. Exception Resolution Time**
 
 Formula: hours from the moment a case enters an exception state to the moment it leaves. While a case is open, report open age.
-Baseline: median open age of the 6 blocking exceptions is **29.7 hours**, worst case 51.7 hours.
+Baseline: median open age of the 5 blocking exceptions is **8.0 hours**, worst case 49.0 hours.
 Target: **median under 4 hours, p90 under 24 hours**, matching the per-code SLAs below.
 Owner: the assigned owner, escalated to ops_lead at SLA.
 
@@ -63,7 +63,7 @@ Owner: Head of Ops. This is the metric the whole redesign exists to move.
 Two supporting counters, not headline metrics:
 
 - **Stuck Invoice Rate over 12 hours**: 6 of 12 paid invoices, 50%. This is the dashboard tile the ops head asked for.
-- **Zero Touch Eligible Rate**: 8 of 12 paid invoices, 66.7%. This says how much of the queue never needs a human, independent of what the engine actually pushed today.
+- **Zero Touch Eligible Rate**: 9 of 12 paid invoices, 75.0%. This says how much of the queue never needs a human, independent of what the engine actually pushed today.
 
 ## SLA table by reason code
 

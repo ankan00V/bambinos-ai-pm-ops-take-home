@@ -6,20 +6,20 @@
 | --- | --- |
 | 13 cases, 12 with money | The dataset. 11 Paid, 1 Partially_Paid, 1 Failed |
 | 16.7% | Paid invoices with no teacher form, 2 of 12, INR 29,000 |
-| 66.7% | Paid renewals that can clear with no human, 8 of 12 |
-| 46.2% | Auto-approved in this snapshot, 6 of 13, because 6 genuinely need a person |
+| 75.0% | Paid renewals that can clear with no human, 9 of 12 |
+| 53.8% | Auto-approved in this snapshot, 7 of 13, because 5 genuinely need a person |
 | 91.7% | Paid renewals with no future class, 11 of 12, INR 126,850. Proxy, verify before quoting |
-| 155 hours | Ops time saved per month at 1,000 renewals, base case |
+| 144 hours | Ops time saved per month at 1,000 renewals, base case |
 
 ## The one paragraph version
 
-The payment gateway already knows the student, the class, the batch, the teacher, the amount and the discount. For 11 of 12 forms, the only extra field is a preferred time, and it matches the batch the child is already in. So the teacher form is not a control, it is a delay: 27 minutes of median waiting, 16.7% of paid invoices never getting one, and a typo class that exists only because a human retypes an invoice number. The engine reads the invoice, checks it against the active record and a seat ledger, schedules the clean ones, and routes five specific exception types to named owners with SLAs and drafted messages.
+The payment gateway already knows the student, the class, the batch, the teacher, the amount and the discount. For 11 of 12 forms, the only extra field is a preferred time, and it matches the batch the child is already in. So the teacher form is not a control, it is a delay: 27 minutes of median waiting, 16.7% of paid invoices never getting one, and a typo class that exists only because a human retypes an invoice number. The engine reads the invoice, checks it against the active record, retains an existing seat for same-batch renewals, and routes the five true exception types to named owners with SLAs and drafted messages.
 
 ## Ten questions they will ask
 
-**1. Your auto-approval rate is 46%. Why so low?**
+**1. Your auto-approval rate is 54%. Why is that lower than the 75% zero-touch figure?**
 
-Because the snapshot has 13 cases and 6 of them need a person: a failed payment, a half payment, a payer mismatch, a full batch, a batch change, and one case stuck after approval. The forward-looking number is 66.7%, which counts cases that would clear from a clean state. I report both because the first is what happened today and the second is what the design delivers.
+Because the snapshot has 13 cases and 5 of them need a person: a failed payment, a half payment, a payer mismatch, a batch change, and one case stuck after approval. The apparent full-batch case is a same-batch renewal for a student already counted in the 6 of 6, so the engine retains the existing seat rather than treating it as a seventh student. The forward-looking number is 75.0%, which counts cases that would clear from a clean state. I report both because the first is what happened today and the second is what the design delivers.
 
 **2. What stops a teacher submitting wrong information?**
 
@@ -43,7 +43,7 @@ Because I cannot explain a wrong answer to a parent. Every decision here is a ru
 
 **7. What do you do when the batch is full?**
 
-The engine stops and routes to Ops with the seat count, the amount and how long the parent has waited. It does not silently overflow the batch. On 9205 there is a wrinkle worth knowing: the renewing student is already inside the 6 of 6, so the block may be a counting artefact rather than real capacity. That is a policy question for the Head of Ops, and I flag it rather than deciding it.
+For a new allocation, the engine stops and routes to Ops; it never silently overflows a batch. On 9205, the renewal is for a student already inside the 6 of 6, so this is not a new allocation: the engine retains the existing seat. The test suite covers both that protection and the true full-batch block for a new allocation.
 
 **8. Why is the discounted renewal not an exception?**
 

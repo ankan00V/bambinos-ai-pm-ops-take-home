@@ -7,7 +7,7 @@ import pytest
 from engine.load import load_dataset
 from engine.normalize import email_score, normalize_phone, parse_invoice_ref, phone_score
 from engine.pipeline import run
-from engine.rules import evaluate
+from engine.rules import allocate_seats, approve, evaluate, new_decision
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 FILES = [
@@ -161,9 +161,21 @@ def test_r07_failed_payment_blocks(tmp_path):
     assert row["owner"] == "parent"
 
 
-def test_r08_full_batch_blocks_with_capacity_detail(tmp_path):
+def test_same_batch_renewal_at_nominal_capacity_retains_existing_seat(tmp_path):
     decisions = decisions_for(copy_data(tmp_path))
     row = case(decisions, "84905")
+    assert row["primary_code"] == "R00"
+    assert row["decision"] == "AUTO_APPROVE"
+    assert row["capacity_action"] == "retain_existing_seat"
+    assert "consumes no additional capacity" in row["reason"]
+
+
+def test_r08_blocks_a_new_allocation_when_the_batch_is_full(tmp_path):
+    dataset = load_dataset(copy_data(tmp_path))
+    row = new_decision("TEST", "invoice", "TEST", dataset)
+    row.update({"student_id": "68103", "classbatch_id": "9205", "continue_same_batch": "No", "amount_collected": 9000})
+    approve(row, "Synthetic new allocation into a full batch.")
+    allocate_seats([row], dataset)
     assert row["primary_code"] == "R08"
     assert "6 of 6" in row["reason"]
 
@@ -299,8 +311,8 @@ def test_run_writes_every_required_output(tmp_path):
     for name in ("auto_approved.csv", "exceptions.csv", "messages.csv", "messages.md", "summary.json"):
         assert (out / name).exists(), name
     assert summary["cases"]["total"] == 13
-    assert summary["auto_approved"] == 6
-    assert summary["exceptions_blocking"] == 6
+    assert summary["auto_approved"] == 7
+    assert summary["exceptions_blocking"] == 5
     assert summary["metrics"]["orphaned_invoices"] == 2
     assert summary["estimated_hours_saved_per_month"] > 0
 

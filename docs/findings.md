@@ -91,7 +91,7 @@ Denominators are stated for each row. Where a hypothesis produced zero cases I s
 
 ### Failure modes that were not on the brief's list
 
-**The batch-full block looks like a counting artefact.** Batch 9205 is at 6 of 6, and student 68105 is one of those six. A renewal means the child continues, so the seat is already theirs. Treating 6 of 6 as full for an existing occupant is how a paying child gets locked out of a class they are already sitting in. Only one case here, so it needs a check against the real capacity rule before anyone changes code, but it is the single cheapest win in the dataset: one policy conversation, one child back in class.
+**The batch-full block is a counting artefact, not a capacity exception.** Batch 9205 is at 6 of 6, and student 68105 is one of those six. A same-batch renewal extends an occupied seat; it does not consume a seventh. Engine v1.1 therefore retains this seat automatically and records the historical `Failed_Batch_Full` status as a bug to fix, while still blocking any future new allocation into a full batch.
 
 **The teacher form is the only bridge for a payer mismatch, and it is not independent evidence.** On 84904 the invoice carries a mobile number that appears nowhere else, and the form supplies a number that matches the parent record. That looks like helpful corroboration until you notice the teacher typed it from the same WhatsApp conversation that produced the payment. It is not a second source, it is a copy of the same conversation. The engine holds this case for one call instead of auto-approving it.
 
@@ -141,4 +141,4 @@ The brief asks whether the teacher form can be eliminated for clean renewals. On
 
 So the engine runs the invoice as the trigger and treats the form as optional corroboration. That single change removes the 27 minute wait, removes the 16.7% orphan rate, and removes the typo class entirely, because there is no invoice number for a teacher to mistype.
 
-The five things that still need a human are the five that money cannot settle: a full batch, a half payment, a failed payment, a requested batch change, and a payer whose contact details do not match. Those are the exception paths, and they get owners, SLAs and drafted messages.
+The five things that still need a human are the five that money cannot settle: a half payment, a failed payment, a requested batch change, a payer whose contact details do not match, and an approved booking with no sessions. Those are the exception paths, and they get owners, SLAs and drafted messages.

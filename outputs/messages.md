@@ -1,6 +1,6 @@
 # Drafted messages
 
-14 drafts across 7 exceptions, generated from data as of 2026-11-03 18:00:00. Names and numbers appear masked because the source files are masked.
+12 drafts across 6 exceptions, generated from data as of 2026-11-03 18:00:00. Names and numbers appear masked because the source files are masked.
 
 ## Case 84902
 
@@ -27,24 +27,6 @@ Escalation: Escalate to ops_lead if unresolved after 4h
 To: #renewals-exceptions
 
 > 84904 An***a Iy***r. Paid Rs 12,000, but the payer contact matches neither the registered mobile (+91-9844XXXX04) nor the registered email (su***h.iy***@outlook.com). The teacher form gives +91-9844XXXX04, which matches the registered number, and the remark says the mother paid. One call confirms it, then release. Open 30.5 hours.
-
-Escalation: Escalate to ops_lead if unresolved after 4h
-
-## Case 84905
-
-**WhatsApp to parent** (R08)
-
-To: +91-9855XXXX05 (parent WhatsApp)
-
-> Hi, this is Priya from Bambinos. Re***h Pa***l's renewal of Rs 11,000 came through on 2 Nov, thank you. The Unbox Chess Level 2 batch at 11:00 is full at 6 of 6 seats, so I can't put the student back in that slot today. I'm checking with Coach Arvind K*** whether we can keep the place or move to another batch. You don't need to do anything right now, and I'll come back to you today with a firm option.
-
-Escalation: Escalate to ops_lead if unresolved after 4h
-
-**Slack to ops_agent** (R08)
-
-To: #renewals-exceptions
-
-> 84905 Re***h Pa***l. Batch 9205 (CM-G4-Batch-D) at 6/6 seats. Rs 11,000 cleared 2 Nov, open 28.8 hours. The student is already inside that seat count, so confirm whether this is a real capacity block. Ask Coach Arvind K*** (1122) if the batch continues. If yes, renew in place. If no, offer a batch with a free seat. Parent messaged.
 
 Escalation: Escalate to ops_lead if unresolved after 4h
 

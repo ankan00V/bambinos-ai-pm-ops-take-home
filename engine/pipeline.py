@@ -31,6 +31,7 @@ AUTO_FIELDS = [
     "amount_collected",
     "currency",
     "paid_at",
+    "capacity_action",
     "seats_left_after",
     "primary_code",
     "flags",
@@ -117,6 +118,7 @@ DECISION_FIELDS = [
     "reason",
     "match_method",
     "match_score",
+    "capacity_action",
     "seats_left_after",
     "data_as_of",
 ]
@@ -333,6 +335,7 @@ def run(data_dir=None, output_dir=None, use_llm=False):
                 "amount_collected": row["amount_collected"],
                 "currency": row["currency"],
                 "paid_at": row["paid_at"],
+                "capacity_action": row["capacity_action"],
                 "seats_left_after": row["seats_left_after"],
                 "primary_code": row["primary_code"],
                 "flags": row["flags"],

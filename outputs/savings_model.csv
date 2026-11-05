@@ -1,18 +1,18 @@
 line_item,value,unit,note
 Monthly renewal volume (assumption),1000,cases,Editable in engine/savings_assumptions.json
-Observed manual minutes per case,8.42,minutes,Weighted by the reason code mix in this dataset
-Manual minutes with context switching,10.53,minutes,Adds the context switch allowance
-New minutes per case at base auto rate,1.22,minutes,Auto rate 70 percent
-Hours today,175.5,hours/month,Monthly volume times manual minutes
-Hours after automation,20.3,hours/month,
-Hours saved,155.2,hours/month,
-Hours saved,1862.0,hours/year,
-Cost today,52644,INR/month,At the assumed loaded hourly cost
-Cost after automation,6088,INR/month,
-Cost saved,46557,INR/month,
-Cost saved,558681,INR/year,
+Observed manual minutes per case,7.81,minutes,Weighted by the reason code mix in this dataset
+Manual minutes with context switching,9.76,minutes,Adds the context switch allowance
+New minutes per case at base auto rate,1.12,minutes,Auto rate 70 percent
+Hours today,162.7,hours/month,Monthly volume times manual minutes
+Hours after automation,18.7,hours/month,
+Hours saved,144.0,hours/month,
+Hours saved,1727.0,hours/year,
+Cost today,48798,INR/month,At the assumed loaded hourly cost
+Cost after automation,5612,INR/month,
+Cost saved,43186,INR/month,
+Cost saved,518227,INR/year,
 One time build cost (assumption),200000,INR,Six weeks of one engineer plus part of an ops lead
-Payback,4.3,months,Build cost divided by monthly labour saving
-Sensitivity at 55 percent auto approval,147.3,hours/month,Cost saved 44200 INR per month
-Sensitivity at 70 percent auto approval,155.2,hours/month,Cost saved 46557 INR per month
-Sensitivity at 80 percent auto approval,160.4,hours/month,Cost saved 48128 INR per month
+Payback,4.6,months,Build cost divided by monthly labour saving
+Sensitivity at 55 percent auto approval,136.9,hours/month,Cost saved 41067 INR per month
+Sensitivity at 70 percent auto approval,144.0,hours/month,Cost saved 43186 INR per month
+Sensitivity at 80 percent auto approval,148.7,hours/month,Cost saved 44598 INR per month
